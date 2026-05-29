@@ -1,0 +1,570 @@
+<style>
+#kg-root *{box-sizing:border-box;margin:0;padding:0}
+#kg-root{
+  font-family:'IBM Plex Mono',ui-monospace,'Courier New',monospace;
+  background:#060d14;color:#a8c4d8;
+  border:1px solid #1a3050;border-radius:6px;
+  overflow:hidden;position:relative;
+  max-width:900px;margin:32px auto;
+}
+#kg-root a{color:#00d4ff}
+
+/* ── header ── */
+#kg-header{
+  background:#0a1620;border-bottom:1px solid #1a3050;
+  padding:14px 20px;display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+#kg-title{font-size:13px;color:#00d4ff;letter-spacing:3px;text-transform:uppercase}
+#kg-subtitle{font-size:10px;color:#3a5870;margin-top:2px}
+#kg-badges{display:flex;gap:6px;flex-wrap:wrap}
+.kg-badge{font-size:9px;padding:3px 8px;border-radius:2px;letter-spacing:1px;
+  border:1px solid;text-transform:uppercase}
+.kg-badge-b{color:#00d4ff;border-color:#004a60;background:rgba(0,212,255,.07)}
+.kg-badge-g{color:#39d98a;border-color:#0d4025;background:rgba(57,217,138,.07)}
+.kg-badge-y{color:#f5a623;border-color:#3d2800;background:rgba(245,166,35,.07)}
+
+/* ── input area ── */
+#kg-input-wrap{padding:16px 20px;border-bottom:1px solid #1a3050;background:#08111a}
+#kg-input-label{font-size:9px;color:#3a5870;letter-spacing:3px;
+  text-transform:uppercase;margin-bottom:8px}
+#kg-text{
+  width:100%;height:100px;background:#060d14;border:1px solid #1a3050;
+  color:#a8c4d8;font-family:inherit;font-size:12.5px;padding:10px 12px;
+  resize:vertical;outline:none;line-height:1.6;border-radius:2px;
+  transition:border-color .2s;
+}
+#kg-text:focus{border-color:#00d4ff}
+#kg-controls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+#kg-run{
+  background:#00d4ff;color:#060d14;border:none;padding:8px 20px;
+  font-family:inherit;font-size:11px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;cursor:pointer;border-radius:2px;
+  transition:background .15s,transform .1s;
+}
+#kg-run:hover{background:#00bde0;transform:translateY(-1px)}
+#kg-run:active{transform:translateY(0)}
+#kg-clear{
+  background:transparent;border:1px solid #1a3050;color:#3a5870;
+  padding:8px 14px;font-family:inherit;font-size:11px;
+  letter-spacing:1px;cursor:pointer;border-radius:2px;
+  transition:all .15s;
+}
+#kg-clear:hover{border-color:#a8c4d8;color:#a8c4d8}
+#kg-stat-line{font-size:10px;color:#3a5870;margin-left:auto}
+
+/* ── tabs ── */
+#kg-tabs{display:flex;border-bottom:1px solid #1a3050;background:#08111a}
+.kg-tab{
+  padding:10px 18px;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:#3a5870;cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;
+  font-family:inherit;
+}
+.kg-tab:hover{color:#a8c4d8}
+.kg-tab.active{color:#00d4ff;border-bottom-color:#00d4ff}
+
+/* ── graph panel ── */
+#kg-graph-wrap{position:relative;width:100%;height:440px;background:#060d14}
+#kg-svg{width:100%;height:100%}
+#kg-empty{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;
+  color:#1a3050;pointer-events:none;
+}
+#kg-empty-icon{font-size:48px;opacity:.4}
+#kg-empty-txt{font-size:11px;letter-spacing:2px;text-transform:uppercase}
+
+/* ── tooltip ── */
+#kg-tip{
+  position:absolute;background:#0a1e30;border:1px solid #00d4ff;
+  padding:8px 12px;font-size:11px;color:#a8c4d8;pointer-events:none;
+  display:none;z-index:10;max-width:220px;line-height:1.6;border-radius:2px;
+}
+#kg-tip strong{color:#00d4ff;display:block;margin-bottom:4px}
+
+/* ── triples panel ── */
+#kg-triples-wrap{
+  display:none;max-height:440px;overflow-y:auto;padding:12px 20px;
+}
+#kg-triples-wrap::-webkit-scrollbar{width:4px}
+#kg-triples-wrap::-webkit-scrollbar-thumb{background:#1a3050;border-radius:2px}
+.kg-triple{
+  display:grid;grid-template-columns:1fr 120px 1fr;gap:0;
+  padding:8px 0;border-bottom:1px solid #0e1e2d;font-size:12px;
+  align-items:center;
+}
+.kg-triple:last-child{border-bottom:none}
+.kg-triple:hover{background:#0a1620}
+.kg-t-subj{color:#00d4ff;padding-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kg-t-rel{
+  text-align:center;color:#f5a623;font-size:10px;letter-spacing:1px;
+  background:#1a0f00;border:1px solid #3d2800;padding:3px 6px;
+  border-radius:2px;white-space:nowrap;
+}
+.kg-t-obj{color:#39d98a;padding-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── legend ── */
+#kg-legend{
+  display:flex;gap:16px;padding:10px 20px;border-top:1px solid #1a3050;
+  background:#08111a;flex-wrap:wrap;
+}
+.kg-leg{display:flex;align-items:center;gap:6px;font-size:10px;color:#3a5870}
+.kg-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+</style>
+
+<div id="kg-root">
+
+  <!-- header -->
+  <div id="kg-header">
+    <div>
+      <div id="kg-title">Knowledge Graph Explorer</div>
+      <div id="kg-subtitle">Client-side NER + Relation Extraction → Interactive Graph</div>
+    </div>
+    <div id="kg-badges">
+      <span class="kg-badge kg-badge-b">NER</span>
+      <span class="kg-badge kg-badge-g">D3.js</span>
+      <span class="kg-badge kg-badge-y">Interactive</span>
+    </div>
+  </div>
+
+  <!-- input -->
+  <div id="kg-input-wrap">
+    <div id="kg-input-label">▶ paste any text below</div>
+    <textarea id="kg-text" spellcheck="false" placeholder="Elon Musk founded SpaceX in 2002. Tesla is headquartered in Austin, Texas. Apple was founded by Steve Jobs in California. Google acquired YouTube in 2006. Sundar Pichai is CEO of Google. Microsoft is based in Redmond, Washington."></textarea>
+    <div id="kg-controls">
+      <button id="kg-run">Build Graph ▶</button>
+      <button id="kg-clear">Clear</button>
+      <span id="kg-stat-line">—</span>
+    </div>
+  </div>
+
+  <!-- tabs -->
+  <div id="kg-tabs">
+    <button class="kg-tab active" data-tab="graph">Graph View</button>
+    <button class="kg-tab" data-tab="triples">Triples Table</button>
+  </div>
+
+  <!-- graph -->
+  <div id="kg-graph-wrap">
+    <svg id="kg-svg"></svg>
+    <div id="kg-empty">
+      <div id="kg-empty-icon">◎</div>
+      <div id="kg-empty-txt">Enter text and click Build Graph</div>
+    </div>
+    <div id="kg-tip"></div>
+  </div>
+
+  <!-- triples panel -->
+  <div id="kg-triples-wrap"></div>
+
+  <!-- legend -->
+  <div id="kg-legend">
+    <div class="kg-leg"><div class="kg-leg-dot" style="background:#00d4ff"></div>Person</div>
+    <div class="kg-leg"><div class="kg-leg-dot" style="background:#39d98a"></div>Organisation</div>
+    <div class="kg-leg"><div class="kg-leg-dot" style="background:#f5a623"></div>Location</div>
+    <div class="kg-leg"><div class="kg-leg-dot" style="background:#a78bfa"></div>Date / Other</div>
+    <div class="kg-leg" style="margin-left:auto;color:#1a3050">Drag nodes · Click to inspect · Scroll to zoom</div>
+  </div>
+
+</div>
+
+<!-- D3 v7 from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+// ── colour map ──────────────────────────────────────────────
+const COLOR = {
+  PERSON:'#00d4ff', ORG:'#39d98a', GPE:'#f5a623',
+  LOC:'#f5a623', DATE:'#a78bfa', DEFAULT:'#a8c4d8'
+};
+
+// ── NER: known entity lists ──────────────────────────────────
+const PERSONS = [
+  'Elon Musk','Steve Jobs','Jeff Bezos','Sundar Pichai',
+  'Bill Gates','Mark Zuckerberg','Tim Cook','Satya Nadella',
+  'Sam Altman','Sergey Brin','Larry Page','Jack Ma',
+  'Warren Buffett','Barack Obama','Donald Trump','Joe Biden',
+  'Taylor Swift','Cristiano Ronaldo','Lionel Messi',
+  'Albert Einstein','Stephen Hawking','Marie Curie',
+  'Elon','Musk','Bezos','Zuckerberg','Pichai','Gates',
+  'Altman','Cook','Nadella'
+];
+
+const ORGS = [
+  'SpaceX','Tesla','Apple','Google','Microsoft','Amazon',
+  'Facebook','Meta','OpenAI','Twitter','X Corp','YouTube',
+  'Netflix','Uber','Airbnb','Nvidia','Intel','IBM','Oracle',
+  'Salesforce','Adobe','Spotify','TikTok','ByteDance',
+  'Alibaba','Baidu','Samsung','Sony','Toyota','BMW',
+  'Whole Foods','LinkedIn','Instagram','WhatsApp','Snapchat',
+  'Pixar','Disney','NASA','WHO','UN','IMF','World Bank',
+  'Harvard','MIT','Stanford','Oxford','Cambridge',
+];
+
+const LOCATIONS = [
+  'Austin','Texas','California','Cupertino','Seattle',
+  'San Francisco','New York','Washington','Redmond',
+  'Mountain View','Palo Alto','Los Angeles','Chicago',
+  'Boston','London','Paris','Berlin','Tokyo','Beijing',
+  'Shanghai','Mumbai','Sydney','Toronto','Vancouver',
+  'India','China','USA','UK','Germany','France','Japan',
+  'Canada','Australia','Brazil','Russia',
+];
+
+// ── relation patterns (regex based) ─────────────────────────
+const REL_PATTERNS = [
+  { re:/(\b(?:co-?)?founded?\b|\bestablished?\b|\bcreated?\b)/i, rel:'FOUNDED' },
+  { re:/\bacquired?\b|\bbought?\b|\bpurchased?\b/i, rel:'ACQUIRED' },
+  { re:/\bCEO\b|\bchief executive\b/i, rel:'CEO_OF' },
+  { re:/\bCTO\b|\bchief technology\b/i, rel:'CTO_OF' },
+  { re:/\bCFO\b|\bchief financial\b/i, rel:'CFO_OF' },
+  { re:/\bpresident\b/i, rel:'PRESIDENT_OF' },
+  { re:/\bheadquartered in\b|\bbased in\b|\blocated in\b/i, rel:'HQ_IN' },
+  { re:/\bworks? (?:at|for)\b|\bemploys?\b/i, rel:'WORKS_AT' },
+  { re:/\bpartners? with\b|\bcollaborates? with\b/i, rel:'PARTNERS_WITH' },
+  { re:/\bmerged? with\b/i, rel:'MERGED_WITH' },
+  { re:/\binvested? in\b|\bfunded?\b/i, rel:'INVESTED_IN' },
+  { re:/\blaunched?\b|\breleased?\b/i, rel:'LAUNCHED' },
+  { re:/\bborn in\b|\bnative of\b/i, rel:'BORN_IN' },
+  { re:/\bleads?\b|\bmanages?\b|\bruns?\b/i, rel:'LEADS' },
+  { re:/\bserves? as\b/i, rel:'SERVES_AS' },
+];
+
+// ── NER: tag entities in a sentence ─────────────────────────
+function tagEntities(sentence){
+  const found = [];
+  function tryAdd(text, type){
+    const idx = sentence.indexOf(text);
+    if(idx >= 0) found.push({text, type, idx});
+  }
+  PERSONS.forEach(p => tryAdd(p,'PERSON'));
+  ORGS.forEach(o => tryAdd(o,'ORG'));
+  LOCATIONS.forEach(l => tryAdd(l,'GPE'));
+
+  // also catch capitalised words not in lists (heuristic)
+  const capRe = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b/g;
+  let m;
+  while((m = capRe.exec(sentence)) !== null){
+    const w = m[1];
+    if(!found.find(e=>e.text===w) &&
+       !['The','This','That','These','Those','In','At','On',
+         'And','But','For','With','From','By','Of','To','A',
+         'An','It','He','She','They','We','I'].includes(w)){
+      found.push({text:w, type:'DEFAULT', idx:m.index});
+    }
+  }
+
+  // Deduplicate: prefer longer match at same position
+  const deduped = [];
+  found.sort((a,b)=>b.text.length - a.text.length);
+  const usedIdxs = new Set();
+  for(const e of found){
+    const positions = [...e.text].map((_,i)=>e.idx+i);
+    if(!positions.some(p=>usedIdxs.has(p))){
+      positions.forEach(p=>usedIdxs.add(p));
+      deduped.push(e);
+    }
+  }
+  return deduped;
+}
+
+// ── RE: extract triples from sentences ──────────────────────
+function extractTriples(text){
+  const sentences = text.match(/[^.!?\n]+[.!?\n]?/g) || [text];
+  const triples = [];
+  const seen = new Set();
+
+  for(const sent of sentences){
+    const s = sent.trim();
+    if(!s || s.length < 10) continue;
+    const ents = tagEntities(s);
+    if(ents.length < 2) continue;
+
+    // find which pattern matches
+    let rel = 'RELATED_TO';
+    for(const pat of REL_PATTERNS){
+      if(pat.re.test(s)){ rel = pat.rel; break; }
+    }
+
+    // pair closest relevant entities
+    // subj = first entity, obj = second
+    const sorted = ents.sort((a,b)=>a.idx-b.idx);
+    for(let i=0; i<sorted.length-1; i++){
+      const subj = sorted[i];
+      const obj  = sorted[i+1];
+      if(subj.text === obj.text) continue;
+      const key = `${subj.text}||${rel}||${obj.text}`;
+      if(!seen.has(key)){
+        seen.add(key);
+        triples.push({
+          subject: subj.text,
+          subjType: subj.type,
+          relation: rel,
+          object: obj.text,
+          objType: obj.type,
+          sentence: s
+        });
+      }
+    }
+  }
+  return triples;
+}
+
+// ── build nodes + links from triples ────────────────────────
+function buildGraph(triples){
+  const nodeMap = new Map();
+  const links = [];
+
+  triples.forEach(t=>{
+    if(!nodeMap.has(t.subject))
+      nodeMap.set(t.subject,{id:t.subject, type:t.subjType, links:[]});
+    if(!nodeMap.has(t.object))
+      nodeMap.set(t.object,{id:t.object, type:t.objType, links:[]});
+    nodeMap.get(t.subject).links.push(t.object);
+    links.push({
+      source:t.subject, target:t.object,
+      label:t.relation, sentence:t.sentence
+    });
+  });
+
+  return {
+    nodes: [...nodeMap.values()],
+    links
+  };
+}
+
+// ── D3 graph renderer ────────────────────────────────────────
+function renderGraph(graph){
+  const svg = d3.select('#kg-svg');
+  svg.selectAll('*').remove();
+
+  const wrap = document.getElementById('kg-graph-wrap');
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+
+  const g = svg.append('g');
+
+  // zoom
+  svg.call(d3.zoom()
+    .scaleExtent([0.3,3])
+    .on('zoom', e=>{ g.attr('transform', e.transform); })
+  );
+
+  // arrowhead
+  svg.append('defs').append('marker')
+    .attr('id','kg-arrow')
+    .attr('viewBox','0 -4 10 8')
+    .attr('refX',22).attr('refY',0)
+    .attr('markerWidth',6).attr('markerHeight',6)
+    .attr('orient','auto')
+    .append('path')
+    .attr('d','M0,-4 L10,0 L0,4')
+    .attr('fill','#1a3050');
+
+  // simulation
+  const sim = d3.forceSimulation(graph.nodes)
+    .force('link', d3.forceLink(graph.links)
+      .id(d=>d.id).distance(130).strength(0.6))
+    .force('charge', d3.forceManyBody().strength(-320))
+    .force('center', d3.forceCenter(W/2, H/2))
+    .force('collision', d3.forceCollide(38));
+
+  // links
+  const link = g.append('g').selectAll('line')
+    .data(graph.links).join('line')
+    .attr('stroke','#1a3050')
+    .attr('stroke-width',1.5)
+    .attr('marker-end','url(#kg-arrow)');
+
+  // link labels
+  const linkLabel = g.append('g').selectAll('text')
+    .data(graph.links).join('text')
+    .text(d=>d.label)
+    .attr('fill','#f5a623')
+    .attr('font-size','9px')
+    .attr('font-family','IBM Plex Mono,monospace')
+    .attr('text-anchor','middle')
+    .attr('dy','-4')
+    .style('pointer-events','none')
+    .style('letter-spacing','1px');
+
+  // nodes
+  const node = g.append('g').selectAll('g')
+    .data(graph.nodes).join('g')
+    .attr('cursor','pointer')
+    .call(d3.drag()
+      .on('start',(e,d)=>{
+        if(!e.active) sim.alphaTarget(.3).restart();
+        d.fx=d.x; d.fy=d.y;
+      })
+      .on('drag',(e,d)=>{ d.fx=e.x; d.fy=e.y; })
+      .on('end',(e,d)=>{
+        if(!e.active) sim.alphaTarget(0);
+        d.fx=null; d.fy=null;
+      })
+    );
+
+  // node circle
+  node.append('circle')
+    .attr('r',20)
+    .attr('fill','#060d14')
+    .attr('stroke',d=>COLOR[d.type]||COLOR.DEFAULT)
+    .attr('stroke-width',2);
+
+  // node pulse ring
+  node.append('circle')
+    .attr('r',24)
+    .attr('fill','none')
+    .attr('stroke',d=>COLOR[d.type]||COLOR.DEFAULT)
+    .attr('stroke-width',.5)
+    .attr('opacity',.3);
+
+  // node label
+  node.append('text')
+    .text(d=>d.id.length>10 ? d.id.slice(0,9)+'…' : d.id)
+    .attr('fill',d=>COLOR[d.type]||COLOR.DEFAULT)
+    .attr('font-size','9px')
+    .attr('font-family','IBM Plex Mono,monospace')
+    .attr('text-anchor','middle')
+    .attr('dy','32px')
+    .style('pointer-events','none');
+
+  // type indicator dot
+  node.append('circle')
+    .attr('r',4)
+    .attr('cx',14).attr('cy',-14)
+    .attr('fill',d=>COLOR[d.type]||COLOR.DEFAULT)
+    .attr('stroke','#060d14')
+    .attr('stroke-width',1);
+
+  // tooltip
+  const tip = document.getElementById('kg-tip');
+  node.on('mouseover',(e,d)=>{
+    const related = graph.links
+      .filter(l=>l.source.id===d.id||l.target.id===d.id)
+      .map(l=>`<span style="color:#3a5870">→</span> ${l.source.id===d.id?l.target.id:l.source.id} <span style="color:#f5a623;font-size:9px">[${l.label}]</span>`)
+      .join('<br>');
+    tip.innerHTML = `<strong>${d.id}</strong><span style="color:#3a5870;font-size:9px"> ${d.type}</span><br>${related||'<span style="color:#3a5870">no connections shown</span>'}`;
+    tip.style.display='block';
+  })
+  .on('mousemove', e=>{
+    const rect = document.getElementById('kg-graph-wrap').getBoundingClientRect();
+    let x = e.clientX - rect.left + 12;
+    let y = e.clientY - rect.top + 12;
+    if(x+230 > rect.width) x -= 240;
+    tip.style.left = x+'px';
+    tip.style.top  = y+'px';
+  })
+  .on('mouseout',()=>{ tip.style.display='none'; });
+
+  // click to highlight
+  node.on('click',(e,d)=>{
+    const connectedIds = new Set([d.id]);
+    graph.links.forEach(l=>{
+      if(l.source.id===d.id) connectedIds.add(l.target.id);
+      if(l.target.id===d.id) connectedIds.add(l.source.id);
+    });
+    node.selectAll('circle:first-child')
+      .attr('stroke-width', n=>connectedIds.has(n.id)?3:1)
+      .attr('opacity', n=>connectedIds.has(n.id)?1:0.3);
+    link
+      .attr('stroke', l=>
+        (l.source.id===d.id||l.target.id===d.id)?'#00d4ff':'#1a3050')
+      .attr('stroke-width', l=>
+        (l.source.id===d.id||l.target.id===d.id)?2:1);
+    e.stopPropagation();
+  });
+
+  svg.on('click',()=>{
+    node.selectAll('circle:first-child').attr('stroke-width',2).attr('opacity',1);
+    link.attr('stroke','#1a3050').attr('stroke-width',1.5);
+  });
+
+  // tick
+  sim.on('tick',()=>{
+    link
+      .attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+      .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    linkLabel
+      .attr('x',d=>(d.source.x+d.target.x)/2)
+      .attr('y',d=>(d.source.y+d.target.y)/2);
+    node.attr('transform',d=>`translate(${d.x},${d.y})`);
+  });
+}
+
+// ── render triples table ─────────────────────────────────────
+function renderTriples(triples){
+  const wrap = document.getElementById('kg-triples-wrap');
+  if(!triples.length){
+    wrap.innerHTML='<div style="padding:20px;color:#3a5870;font-size:11px;text-align:center">No triples extracted</div>';
+    return;
+  }
+  wrap.innerHTML = triples.map(t=>`
+    <div class="kg-triple" title="${t.sentence.replace(/"/g,"'")}">
+      <div class="kg-t-subj" title="${t.subject}">${t.subject}</div>
+      <div class="kg-t-rel">${t.relation}</div>
+      <div class="kg-t-obj" title="${t.object}">${t.object}</div>
+    </div>
+  `).join('');
+}
+
+// ── main build ───────────────────────────────────────────────
+let currentGraph = null;
+
+function build(){
+  const text = document.getElementById('kg-text').value.trim();
+  if(!text){ alert('Please enter some text first.'); return; }
+
+  const triples = extractTriples(text);
+  const graph   = buildGraph(triples);
+  currentGraph  = {graph, triples};
+
+  // update stat line
+  document.getElementById('kg-stat-line').textContent =
+    `${graph.nodes.length} nodes · ${graph.links.length} edges · ${triples.length} triples`;
+
+  // hide empty state
+  document.getElementById('kg-empty').style.display =
+    graph.nodes.length ? 'none' : 'flex';
+
+  // render
+  renderGraph(graph);
+  renderTriples(triples);
+}
+
+// ── tabs ─────────────────────────────────────────────────────
+document.querySelectorAll('.kg-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.kg-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    document.getElementById('kg-graph-wrap').style.display =
+      tab==='graph' ? 'block' : 'none';
+    document.getElementById('kg-triples-wrap').style.display =
+      tab==='triples' ? 'block' : 'none';
+  });
+});
+
+// ── clear ────────────────────────────────────────────────────
+document.getElementById('kg-clear').addEventListener('click',()=>{
+  document.getElementById('kg-text').value='';
+  document.getElementById('kg-stat-line').textContent='—';
+  d3.select('#kg-svg').selectAll('*').remove();
+  document.getElementById('kg-triples-wrap').innerHTML='';
+  document.getElementById('kg-empty').style.display='flex';
+});
+
+// ── buttons ──────────────────────────────────────────────────
+document.getElementById('kg-run').addEventListener('click', build);
+document.getElementById('kg-text').addEventListener('keydown', e=>{
+  if(e.ctrlKey && e.key==='Enter') build();
+});
+
+// auto-build on load with placeholder
+setTimeout(build, 300);
+
+})();
+</script>
